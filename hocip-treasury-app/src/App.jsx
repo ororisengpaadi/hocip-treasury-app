@@ -1,51 +1,66 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+import Income from './pages/Income';
+import Expenses from './pages/Expenses';
+import MonthlyReport from './pages/MonthlyReport';
+import AnnualReport from './pages/AnnualReport';
+import { loadData, saveData } from './utils/storage';
+import './App.css';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+export const DataContext = createContext(null);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+export default function App() {
+  const [data, setData]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  useEffect(() => {
+    loadData().then(d => {
+      setData(d);
+      setLoading(false);
+    });
+  }, []);
+
+  async function updateData(newData) {
+    setData(newData);
+    const ok = await saveData(newData);
+    setSaveMsg(ok ? '✓ Saved' : '⚠ Save failed');
+    setTimeout(() => setSaveMsg(''), 2000);
+  }
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <p>Loading treasury data...</p>
+      </div>
+    );
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <DataContext.Provider value={{ data, updateData }}>
+      <BrowserRouter>
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content">
+            {saveMsg && <div className="save-toast">{saveMsg}</div>}
+            <Routes>
+              <Route path="/"         element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/income"    element={<Income />} />
+              <Route path="/expenses"  element={<Expenses />} />
+              <Route path="/monthly"   element={<MonthlyReport />} />
+              <Route path="/annual"    element={<AnnualReport />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </DataContext.Provider>
   );
 }
 
-export default App;
+export function useData() {
+  return useContext(DataContext);
+}
