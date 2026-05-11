@@ -13,7 +13,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <div className="church-icon">✝</div>
+        <img src="/logo.png" alt="App Logo" className="church-icon" />
         <h2>AFM Dzingidzingi</h2>
         <p>Throne of God</p>
         <span className="year-badge">2025 – 2026</span>
