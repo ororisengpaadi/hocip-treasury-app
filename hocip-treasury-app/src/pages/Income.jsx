@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useData } from '../App';
+import { useData } from '../context/DataContext';
 import { MONTHS, filterByMonth, formatCurrency } from '../utils/calculations';
 import { v4 as uuidv4 } from 'uuid';
+import { Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import './Page.css';
 
@@ -13,7 +14,6 @@ const EMPTY = {
   offerings:    '',
   pledges:      '',
   bankInterest: '',
-  totalPaid:    '',
 };
 
 export default function Income() {
@@ -31,10 +31,6 @@ export default function Income() {
     (parseFloat(form.pledges)      || 0) +
     (parseFloat(form.bankInterest) || 0);
 
-  const mismatch =
-    form.totalPaid !== '' &&
-    Math.abs(parseFloat(form.totalPaid) - computed) > 0.01;
-
   function handleChange(e) {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
@@ -47,11 +43,6 @@ export default function Income() {
       setError('Date and Name are required.');
       return;
     }
-    if (mismatch) {
-      setError(`Total Paid must equal Tithes + Offerings + Pledges + Bank Interest (expected R ${computed.toFixed(2)}).`);
-      return;
-    }
-
     const record = {
       id:           editId || uuidv4(),
       date:         form.date,
@@ -61,7 +52,7 @@ export default function Income() {
       offerings:    parseFloat(form.offerings)    || 0,
       pledges:      parseFloat(form.pledges)      || 0,
       bankInterest: parseFloat(form.bankInterest) || 0,
-      totalPaid:    parseFloat(form.totalPaid)    || computed,
+      totalPaid:    computed,
     };
 
     const newIncome = editId
@@ -83,7 +74,6 @@ export default function Income() {
       offerings:    record.offerings.toString(),
       pledges:      record.pledges.toString(),
       bankInterest: record.bankInterest.toString(),
-      totalPaid:    record.totalPaid.toString(),
     });
     setEditId(record.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -103,121 +93,107 @@ export default function Income() {
   const totalDisplayed = sorted.reduce((acc, r) => acc + r.totalPaid, 0);
 
   return (
-    <div className="page">
+    <div className="page entry-page income-page">
       <div className="page-header">
-        <h1>💰 Income</h1>
+        <h1>Income</h1>
         <p>Record tithes, offerings, pledges and bank interest</p>
       </div>
 
       {/* ── Form ───────────────────────────────────────────────── */}
-      <div className="card">
-        <h2>{editId ? '✏️ Edit Record' : '➕ Add Income'}</h2>
+      <div className="card entry-form-card">
+        <h2>{editId ? 'Edit Record' : 'Add Income'}</h2>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="form-grid">
-          <div className="form-group">
-            <label>Date *</label>
-            <input type="date" name="date" value={form.date} onChange={handleChange} required />
+        <form onSubmit={handleSubmit} className="entry-form income-entry-form">
+          <div className="entry-fields-panel income-fields-panel">
+            <div className="form-group">
+              <label>Date *</label>
+              <input type="date" name="date" value={form.date} onChange={handleChange} required />
+            </div>
+
+            <div className="form-group">
+              <label>Receipt No.</label>
+              <input
+                type="text"
+                name="receiptNo"
+                value={form.receiptNo}
+                onChange={handleChange}
+                placeholder="e.g. 001"
+              />
+            </div>
+
+            <div className="form-group name-field">
+              <label>Name (Contributor) *</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Full name"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tithes (R)</label>
+              <input
+                type="number"
+                name="tithes"
+                value={form.tithes}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Offerings (R)</label>
+              <input
+                type="number"
+                name="offerings"
+                value={form.offerings}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Pledges (R)</label>
+              <input
+                type="number"
+                name="pledges"
+                value={form.pledges}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Bank Interest (R)</label>
+              <input
+                type="number"
+                name="bankInterest"
+                value={form.bankInterest}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Receipt No.</label>
-            <input
-              type="text"
-              name="receiptNo"
-              value={form.receiptNo}
-              onChange={handleChange}
-              placeholder="e.g. 001"
-            />
-          </div>
+          <div className="entry-confirm-panel">
+            <p className="confirm-label">Entry total</p>
+            <strong className="confirm-total">{formatCurrency(computed)}</strong>
+            <span className="computed-hint">Calculated from category amounts.</span>
 
-          <div className="form-group">
-            <label>Name (Contributor) *</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Full name"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Tithes (R)</label>
-            <input
-              type="number"
-              name="tithes"
-              value={form.tithes}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Offerings (R)</label>
-            <input
-              type="number"
-              name="offerings"
-              value={form.offerings}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Pledges (R)</label>
-            <input
-              type="number"
-              name="pledges"
-              value={form.pledges}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Bank Interest (R)</label>
-            <input
-              type="number"
-              name="bankInterest"
-              value={form.bankInterest}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className={`form-group${mismatch ? ' field-error' : ''}`}>
-            <label>Total Paid (R) *</label>
-            <input
-              type="number"
-              name="totalPaid"
-              value={form.totalPaid}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              required
-            />
-            {form.totalPaid !== '' && (
-              <span className={`computed-hint ${mismatch ? 'hint-error' : 'hint-ok'}`}>
-                {mismatch
-                  ? `⚠ Expected R ${computed.toFixed(2)}`
-                  : '✓ Matches sub-totals'}
-              </span>
-            )}
-          </div>
-
-          <div className="form-actions">
+            <div className="form-actions">
             <button type="submit" className="btn btn-primary">
               {editId ? 'Update Record' : 'Save Income'}
             </button>
@@ -230,12 +206,13 @@ export default function Income() {
                 Cancel
               </button>
             )}
+            </div>
           </div>
         </form>
       </div>
 
       {/* ── List ───────────────────────────────────────────────── */}
-      <div className="card">
+      <div className="card records-card">
         <div className="card-header-row">
           <h2>Income Records</h2>
           <select
@@ -281,15 +258,21 @@ export default function Income() {
                     <td className="total-cell">{formatCurrency(r.totalPaid)}</td>
                     <td>
                       <button
-                        className="btn-icon"
+                        className="btn-icon btn-edit"
                         onClick={() => handleEdit(r)}
                         title="Edit"
-                      >✏️</button>
+                        aria-label="Edit income record"
+                      >
+                        <Pencil aria-hidden="true" strokeWidth={2.4} />
+                      </button>
                       <button
                         className="btn-icon btn-danger"
                         onClick={() => setDeleteId(r.id)}
                         title="Delete"
-                      >🗑️</button>
+                        aria-label="Delete income record"
+                      >
+                        <Trash2 aria-hidden="true" strokeWidth={2.4} />
+                      </button>
                     </td>
                   </tr>
                 ))}

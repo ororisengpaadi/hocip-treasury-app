@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useData } from '../App';
+import { useData } from '../context/DataContext';
 import { MONTHS, filterByMonth, formatCurrency } from '../utils/calculations';
 import { v4 as uuidv4 } from 'uuid';
+import { Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import './Page.css';
 
@@ -80,75 +81,82 @@ export default function Expenses() {
   const totalCharges = sorted.reduce((acc, r) => acc + r.bankCharges, 0);
 
   return (
-    <div className="page">
+    <div className="page entry-page expenses-page">
       <div className="page-header">
-        <h1>📤 Expenses</h1>
+        <h1>Expenses</h1>
         <p>Record all church expenditure</p>
       </div>
 
       {/* ── Form ───────────────────────────────────────────────── */}
-      <div className="card">
-        <h2>{editId ? '✏️ Edit Expense' : '➕ Add Expense'}</h2>
+      <div className="card entry-form-card">
+        <h2>{editId ? 'Edit Expense' : 'Add Expense'}</h2>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="form-grid">
-          <div className="form-group">
-            <label>Date *</label>
-            <input type="date" name="date" value={form.date} onChange={handleChange} required />
+        <form onSubmit={handleSubmit} className="entry-form expense-entry-form">
+          <div className="entry-fields-panel expense-fields-panel">
+            <div className="form-group">
+              <label>Date *</label>
+              <input type="date" name="date" value={form.date} onChange={handleChange} required />
+            </div>
+
+            <div className="form-group purpose-field">
+              <label>Purpose *</label>
+              <input
+                type="text"
+                name="purpose"
+                value={form.purpose}
+                onChange={handleChange}
+                placeholder="e.g. Electricity bill"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Bank Charges (R)</label>
+              <input
+                type="number"
+                name="bankCharges"
+                value={form.bankCharges}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Amount (R) *</label>
+              <input
+                type="number"
+                name="amount"
+                value={form.amount}
+                onChange={handleChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div className="form-group approved-field">
+              <label>Approved By</label>
+              <input
+                type="text"
+                name="approvedBy"
+                value={form.approvedBy}
+                onChange={handleChange}
+                placeholder="Pastor / Treasurer"
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Purpose *</label>
-            <input
-              type="text"
-              name="purpose"
-              value={form.purpose}
-              onChange={handleChange}
-              placeholder="e.g. Electricity bill"
-              required
-            />
-          </div>
+          <div className="entry-confirm-panel expense-confirm-panel">
+            <p className="confirm-label">Entry total</p>
+            <strong className="confirm-total">{formatCurrency((parseFloat(form.amount) || 0) + (parseFloat(form.bankCharges) || 0))}</strong>
+            <span className="computed-hint">Amount plus bank charges.</span>
 
-          <div className="form-group">
-            <label>Bank Charges (R)</label>
-            <input
-              type="number"
-              name="bankCharges"
-              value={form.bankCharges}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Amount (R) *</label>
-            <input
-              type="number"
-              name="amount"
-              value={form.amount}
-              onChange={handleChange}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Approved By</label>
-            <input
-              type="text"
-              name="approvedBy"
-              value={form.approvedBy}
-              onChange={handleChange}
-              placeholder="Pastor / Treasurer"
-            />
-          </div>
-
-          <div className="form-actions">
+            <div className="form-actions">
             <button type="submit" className="btn btn-primary">
               {editId ? 'Update Expense' : 'Save Expense'}
             </button>
@@ -161,12 +169,13 @@ export default function Expenses() {
                 Cancel
               </button>
             )}
+            </div>
           </div>
         </form>
       </div>
 
       {/* ── List ───────────────────────────────────────────────── */}
-      <div className="card">
+      <div className="card records-card">
         <div className="card-header-row">
           <h2>Expense Records</h2>
           <select
@@ -206,15 +215,21 @@ export default function Expenses() {
                     <td>{r.approvedBy || '—'}</td>
                     <td>
                       <button
-                        className="btn-icon"
+                        className="btn-icon btn-edit"
                         onClick={() => handleEdit(r)}
                         title="Edit"
-                      >✏️</button>
+                        aria-label="Edit expense record"
+                      >
+                        <Pencil aria-hidden="true" strokeWidth={2.4} />
+                      </button>
                       <button
                         className="btn-icon btn-danger"
                         onClick={() => setDeleteId(r.id)}
                         title="Delete"
-                      >🗑️</button>
+                        aria-label="Delete expense record"
+                      >
+                        <Trash2 aria-hidden="true" strokeWidth={2.4} />
+                      </button>
                     </td>
                   </tr>
                 ))}

@@ -1,12 +1,19 @@
 import { NavLink } from 'react-router-dom';
+import {
+  CalendarDays,
+  ChartArea,
+  ClipboardList,
+  HandCoins,
+  ReceiptText,
+} from 'lucide-react';
 import './Sidebar.css';
 
 const links = [
-  { to: '/dashboard', icon: '📊', label: 'Dashboard' },
-  { to: '/income',    icon: '💰', label: 'Income' },
-  { to: '/expenses',  icon: '📤', label: 'Expenses' },
-  { to: '/monthly',   icon: '📅', label: 'Monthly Report' },
-  { to: '/annual',    icon: '📋', label: 'Annual Report' },
+  { to: '/dashboard', Icon: ChartArea, label: 'Dashboard' },
+  { to: '/income',    Icon: HandCoins, label: 'Income' },
+  { to: '/expenses',  Icon: ReceiptText, label: 'Expenses' },
+  { to: '/monthly',   Icon: CalendarDays, label: 'Monthly Report' },
+  { to: '/annual',    Icon: ClipboardList, label: 'Annual Report' },
 ];
 
 export default function Sidebar() {
@@ -26,7 +33,9 @@ export default function Sidebar() {
             to={l.to}
             className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
           >
-            <span className="nav-icon">{l.icon}</span>
+            <span className="nav-icon">
+              <l.Icon aria-hidden="true" strokeWidth={2.25} />
+            </span>
             <span>{l.label}</span>
           </NavLink>
         ))}

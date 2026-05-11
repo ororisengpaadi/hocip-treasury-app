@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useData } from '../App';
+import { useData } from '../context/DataContext';
 import { MONTHS, filterByMonth, sumField, formatCurrency } from '../utils/calculations';
 import dayjs from 'dayjs';
 import './Page.css';
@@ -28,15 +28,14 @@ export default function MonthlyReport() {
   const balance = totalIncome - totalExpenses;
 
   return (
-    <div className="page">
+    <div className="page monthly-page">
       <div className="page-header">
-        <h1>📅 Monthly Report</h1>
+        <h1>Monthly Report</h1>
         <p>Detailed breakdown for any selected month</p>
         <select
           value={selectedMonth}
           onChange={e => setSelected(e.target.value)}
-          className="month-select"
-          style={{ marginLeft: 'auto' }}
+          className="month-select header-action"
         >
           {MONTHS.map(m => (
             <option key={m.key} value={m.key}>{m.label}</option>
@@ -44,12 +43,12 @@ export default function MonthlyReport() {
         </select>
       </div>
 
-      <div className="card">
+      <div className="card monthly-report-card">
         <h2>{monthLabel}</h2>
 
         {/* Income summary */}
-        <div className="report-section">
-          <h3 className="section-title income-title">💰 Income Breakdown</h3>
+        <div className="report-section monthly-income-summary">
+          <h3 className="section-title income-title">Income Breakdown</h3>
           <table className="report-table">
             <tbody>
               <tr><td>Tithes</td>       <td>{formatCurrency(tithes)}</td></tr>
@@ -65,8 +64,8 @@ export default function MonthlyReport() {
         </div>
 
         {/* Expense summary */}
-        <div className="report-section">
-          <h3 className="section-title expense-title">📤 Expense Breakdown</h3>
+        <div className="report-section monthly-expense-summary">
+          <h3 className="section-title expense-title">Expense Breakdown</h3>
           {expenses.length === 0 ? (
             <p className="empty-state">No expenses recorded for this month.</p>
           ) : (

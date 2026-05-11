@@ -1,9 +1,16 @@
-import { useData } from '../App';
+import { useData } from '../context/DataContext';
 import { MONTHS, getMonthlyTotals, formatCurrency } from '../utils/calculations';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
+import {
+  CalendarRange,
+  HandCoins,
+  ReceiptText,
+  Scale,
+  TriangleAlert,
+} from 'lucide-react';
 import dayjs from 'dayjs';
 import './Page.css';
 
@@ -25,20 +32,22 @@ export default function Dashboard() {
     Expenses: parseFloat(m.totalExpenses.toFixed(2)),
   }));
 
-  const recentIncome   = [...data.income].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
-  const recentExpenses = [...data.expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const recentIncome   = [...data.income].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const recentExpenses = [...data.expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
   return (
-    <div className="page">
+    <div className="page dashboard-page">
       <div className="page-header">
-        <h1>📊 Dashboard</h1>
+        <h1>Dashboard</h1>
         <p>AFM Dzingidzingi Throne of God — Financial Year 2025 / 2026</p>
       </div>
 
       {/* Summary cards */}
       <div className="cards-row">
         <div className="summary-card income-card">
-          <div className="card-icon">💰</div>
+          <div className="card-icon">
+            <HandCoins aria-hidden="true" strokeWidth={2.25} />
+          </div>
           <div>
             <p className="card-label">Year-to-Date Income</p>
             <p className="card-value">{formatCurrency(totalIncome)}</p>
@@ -46,7 +55,9 @@ export default function Dashboard() {
         </div>
 
         <div className="summary-card expense-card">
-          <div className="card-icon">📤</div>
+          <div className="card-icon">
+            <ReceiptText aria-hidden="true" strokeWidth={2.25} />
+          </div>
           <div>
             <p className="card-label">Year-to-Date Expenses</p>
             <p className="card-value">{formatCurrency(totalExpenses)}</p>
@@ -54,7 +65,13 @@ export default function Dashboard() {
         </div>
 
         <div className={`summary-card ${yearBalance >= 0 ? 'balance-card' : 'deficit-card'}`}>
-          <div className="card-icon">{yearBalance >= 0 ? '✅' : '⚠️'}</div>
+          <div className="card-icon">
+            {yearBalance >= 0 ? (
+              <Scale aria-hidden="true" strokeWidth={2.25} />
+            ) : (
+              <TriangleAlert aria-hidden="true" strokeWidth={2.25} />
+            )}
+          </div>
           <div>
             <p className="card-label">Year Balance</p>
             <p className="card-value">{formatCurrency(yearBalance)}</p>
@@ -62,7 +79,9 @@ export default function Dashboard() {
         </div>
 
         <div className="summary-card month-card">
-          <div className="card-icon">📅</div>
+          <div className="card-icon">
+            <CalendarRange aria-hidden="true" strokeWidth={2.25} />
+          </div>
           <div>
             <p className="card-label">{currentMonth.label} Balance</p>
             <p className="card-value">{formatCurrency(currentMonth.balance)}</p>
@@ -73,15 +92,15 @@ export default function Dashboard() {
       {/* Bar chart */}
       <div className="card">
         <h2>Income vs Expenses — Monthly Overview</h2>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eaecee" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-            <YAxis tickFormatter={v => `R${v}`} tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5ea" />
+            <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#6e6e73' }} />
+            <YAxis tickFormatter={v => `R${v}`} tick={{ fontSize: 13, fill: '#6e6e73' }} />
             <Tooltip formatter={value => [`R ${value.toFixed(2)}`]} />
             <Legend />
-            <Bar dataKey="Income"   fill="#27ae60" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Expenses" fill="#e74c3c" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Income"   fill="#34c759" radius={[5, 5, 0, 0]} />
+            <Bar dataKey="Expenses" fill="#ff3b30" radius={[5, 5, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

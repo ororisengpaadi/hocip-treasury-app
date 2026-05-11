@@ -1,15 +1,14 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import MonthlyReport from './pages/MonthlyReport';
 import AnnualReport from './pages/AnnualReport';
+import { DataContext } from './context/DataContext';
 import { loadData, saveData } from './utils/storage';
 import './App.css';
-
-export const DataContext = createContext(null);
 
 export default function App() {
   const [data, setData]       = useState(null);
@@ -26,8 +25,8 @@ export default function App() {
   async function updateData(newData) {
     setData(newData);
     const ok = await saveData(newData);
-    setSaveMsg(ok ? '✓ Saved' : '⚠ Save failed');
-    setTimeout(() => setSaveMsg(''), 2000);
+    setSaveMsg(ok ? 'Saved' : 'Save failed');
+    setTimeout(() => setSaveMsg(''), 3500);
   }
 
   if (loading) {
@@ -42,25 +41,32 @@ export default function App() {
   return (
     <DataContext.Provider value={{ data, updateData }}>
       <BrowserRouter>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
-            {saveMsg && <div className="save-toast">{saveMsg}</div>}
-            <Routes>
-              <Route path="/"         element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/income"    element={<Income />} />
-              <Route path="/expenses"  element={<Expenses />} />
-              <Route path="/monthly"   element={<MonthlyReport />} />
-              <Route path="/annual"    element={<AnnualReport />} />
-            </Routes>
-          </main>
-        </div>
+        <AppShell saveMsg={saveMsg} />
       </BrowserRouter>
     </DataContext.Provider>
   );
 }
 
-export function useData() {
-  return useContext(DataContext);
+function AppShell({ saveMsg }) {
+  const location = useLocation();
+
+  return (
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
+        {saveMsg && <div className="save-toast">{saveMsg}</div>}
+
+        <div key={location.pathname} className="route-transition">
+          <Routes location={location}>
+            <Route path="/"          element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/income"    element={<Income />} />
+            <Route path="/expenses"  element={<Expenses />} />
+            <Route path="/monthly"   element={<MonthlyReport />} />
+            <Route path="/annual"    element={<AnnualReport />} />
+          </Routes>
+        </div>
+      </main>
+    </div>
+  );
 }

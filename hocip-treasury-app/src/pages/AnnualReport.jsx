@@ -1,4 +1,4 @@
-import { useData } from '../App';
+import { useData } from '../context/DataContext';
 import { getMonthlyTotals, formatCurrency } from '../utils/calculations';
 import { exportToExcel } from '../utils/excelExport';
 import './Page.css';
@@ -18,12 +18,12 @@ export default function AnnualReport() {
   const yearBalance   = totalIncome - totalExpenses;
 
   return (
-    <div className="page">
+    <div className="page annual-page">
       <div className="page-header">
-        <h1>📋 Annual Report</h1>
+        <h1>Annual Report</h1>
         <p>Financial Year October 2025 — September 2026</p>
-        <button className="btn btn-primary" onClick={() => exportToExcel(data)}>
-          📥 Export to Excel
+        <button className="btn btn-primary header-action" onClick={() => exportToExcel(data)}>
+          Export to Excel
         </button>
       </div>
 
