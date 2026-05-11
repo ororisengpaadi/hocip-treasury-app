@@ -5,9 +5,11 @@
 }
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f0f2f5;
-  color: #2c3e50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
 }
 
 .app-layout {
@@ -19,6 +21,29 @@ body {
   flex: 1;
   overflow-y: auto;
   position: relative;
+  background:
+    radial-gradient(circle at top left, rgba(0, 102, 204, 0.13), transparent 340px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 247, 251, 0) 280px),
+    #f4f7fb;
+}
+
+.route-transition {
+  min-height: 100%;
+  animation: pageEnter 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-36px) scale(0.994);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 /* Loading screen */
@@ -29,15 +54,15 @@ body {
   justify-content: center;
   height: 100vh;
   gap: 16px;
-  color: #1a5276;
+  color: #0066cc;
   font-size: 15px;
 }
 
 .loading-spinner {
   width: 44px;
   height: 44px;
-  border: 4px solid #d6eaf8;
-  border-top-color: #1a5276;
+  border: 4px solid #d7eaff;
+  border-top-color: #007aff;
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
@@ -47,17 +72,27 @@ body {
 /* Save toast */
 .save-toast {
   position: fixed;
-  top: 16px;
-  right: 24px;
-  background: #1e8449;
+  top: 24px;
+  right: 32px;
+  background: rgba(30, 132, 73, 0.96);
   color: #fff;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  animation: fadeIn 0.2s ease;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.18);
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition {
+    animation: none;
+  }
+
+  .loading-spinner {
+    animation: none;
+  }
+}
